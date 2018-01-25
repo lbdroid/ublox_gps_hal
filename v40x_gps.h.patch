@@ -1,0 +1,38 @@
+--- framework_originals/gps.orig.v4.h   2012-01-20 19:35:26.000000000 +0100
++++ ../../libhardware/include/hardware/gps.h    2012-11-21 07:28:05.000000000 +0100
+@@ -364,6 +364,13 @@
+  */
+ typedef pthread_t (* gps_create_thread)(const char* name, void (*start)(void *), void* arg);
+ 
++#define CONTROL_PLANE_AGPS // enable this defined to have the control plane aiding functionality
++#ifdef CONTROL_PLANE_AGPS
++//type=0 correct msg
++//type=1 error msg
++typedef void (* gps_agps_assist_callback)(int type, const char* buffer, int length);
++#endif
++
+ /** GPS callback structure. */
+ typedef struct {
+     /** set to sizeof(GpsCallbacks) */
+@@ -377,6 +384,9 @@
+     gps_release_wakelock release_wakelock_cb;
+     gps_create_thread create_thread_cb;
+     gps_request_utc_time request_utc_time_cb;
++#ifdef CONTROL_PLANE_AGPS
++       gps_agps_assist_callback agps_assist_cb; 
++#endif
+ } GpsCallbacks;
+ 
+ 
+@@ -671,6 +681,11 @@
+      * These parameters match values in the android.net.NetworkInfo class.
+      */
+     void (*update_network_availability) (int avaiable, const char* apn);
++
++#ifdef CONTROL_PLANE_AGPS
++       //add one function in AGpsRilInterface structure gps.h
++       void (*agps_assist_message) (uint8_t *msg, size_t len);
++#endif
+ } AGpsRilInterface;
+ 
+ __END_DECLS
